@@ -1,0 +1,534 @@
+{
+	"info": {
+		"_postman_id": "189de0db-3a1b-49ce-a12c-d9f569082c53",
+		"name": "AUT-Karate",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Signup Account",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var userName = getUsername();\r",
+							"\r",
+							"pm.collectionVariables.set(\"username\", userName);\r",
+							"pm.collectionVariables.set(\"email\", userName+\"@fakegmail.com\");\r",
+							"\r",
+							"function getUsername(){\r",
+							"    const userName = pm.collectionVariables.get(\"name\") + parseInt(Math.random()*10000);\r",
+							"    console.log(userName);\r",
+							"    return userName;\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"User should be created\", function () {\r",
+							"    pm.expect(response.user.username).to.eql(pm.collectionVariables.get(\"username\"));\r",
+							"});\r",
+							"\r",
+							"console.log(response);\r",
+							"pm.collectionVariables.set(\"token\", response.user.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user\": {\r\n        \"email\": \"{{email}}\",\r\n        \"password\": \"{{password}}\",\r\n        \"username\": \"{{username}}\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/users/",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login Account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"User log in successfully\", function () {\r",
+							"    pm.expect(response.user.username).to.eql(pm.collectionVariables.get(\"username\"));\r",
+							"});\r",
+							"\r",
+							"console.log(response);\r",
+							"pm.collectionVariables.set(\"authToken\", response.user.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"user\":{\"email\":\"{{email}}\",\"password\":\"{{password}}\"}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/users/login",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create new Article",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var articleName = getArticleName();\r",
+							"\r",
+							"pm.collectionVariables.set(\"article\", articleName);\r",
+							"\r",
+							"function getArticleName(){\r",
+							"    const article = \"Article\" + parseInt(Math.random()*10000);\r",
+							"    console.log(article);\r",
+							"    return article;\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Article should be created\", function () {\r",
+							"    pm.expect(response.article.title).to.eql(pm.collectionVariables.get(\"article\"));\r",
+							"});\r",
+							"\r",
+							"console.log(response);\r",
+							"pm.collectionVariables.set(\"articleId\", response.article.slug);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Token {{authToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"article\": {\r\n        \"tagList\": [],\r\n        \"title\": \"{{article}}\",\r\n        \"description\": \"description for {{article}}\",\r\n        \"body\": \"body for {{article}}\"\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/articles/",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"articles",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Articles",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/articles?limit=10&offset=0",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"articles"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Mark Favorite to An Article",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/articles/{{articleId}}/favorite",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"articles",
+						"{{articleId}}",
+						"favorite"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Articles is favorited by Your username",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/articles?limit=10&offset=0&favorited={{username}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"articles"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						},
+						{
+							"key": "favorited",
+							"value": "{{username}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete an Article by Id",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/articles/{{articleId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"articles",
+						"{{articleId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add comment to an Article",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"const response = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Comment should be created\", function () {\r",
+							"    pm.expect(response.comment.author.username).to.eql(pm.collectionVariables.get(\"username\"));\r",
+							"});\r",
+							"\r",
+							"console.log(response);\r",
+							"pm.collectionVariables.set(\"commentId\", response.comment.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{authToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"comment\": {\r\n        \"body\": \"bla bla bla 2\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/articles/{{articleId}}/comments",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"articles",
+						"{{articleId}}",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get comments of an Article",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/articles/{{articleId}}/comments",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"articles",
+						"{{articleId}}",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get comments of an Article Copy",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/articles/{{articleId}}/comments/{{commentId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"articles",
+						"{{articleId}}",
+						"comments",
+						"{{commentId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Tags",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Token {{authToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/tags",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"tags"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "https://api.realworld.io/api"
+		},
+		{
+			"key": "password",
+			"value": "Kms@2019"
+		},
+		{
+			"key": "name",
+			"value": "<your_username>"
+		},
+		{
+			"key": "username",
+			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "authToken",
+			"value": ""
+		},
+		{
+			"key": "article",
+			"value": ""
+		},
+		{
+			"key": "articleId",
+			"value": ""
+		},
+		{
+			"key": "commentId",
+			"value": ""
+		}
+	]
+}
